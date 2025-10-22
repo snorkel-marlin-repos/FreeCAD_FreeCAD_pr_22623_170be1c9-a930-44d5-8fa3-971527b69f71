@@ -31,7 +31,6 @@
 #endif
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/io/ios_state.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/math/special_functions/trunc.hpp>
 

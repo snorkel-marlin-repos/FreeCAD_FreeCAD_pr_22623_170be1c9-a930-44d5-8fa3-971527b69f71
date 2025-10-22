@@ -373,25 +373,22 @@ protected:
     double Increment;
     std::vector<AutoConstraint> SugConstr;
 
+    // Add hint structures here
+    struct HintEntry
+    {
+        SelectMode state;
+        std::list<Gui::InputHint> hints;
+    };
+
+    using HintTable = std::vector<HintEntry>;
+
+    static HintTable getExtendHintTable();
+    static std::list<Gui::InputHint> lookupExtendHints(SelectMode state);
+
 public:
     std::list<Gui::InputHint> getToolHints() const override
     {
-        using enum Gui::InputHint::UserInput;
-
-        return Gui::lookupHints<SelectMode>(
-            Mode,
-            {
-                {.state = STATUS_SEEK_First,
-                 .hints =
-                     {
-                         {tr("%1 pick edge to extend", "Sketcher Extend: hint"), {MouseLeft}},
-                     }},
-                {.state = STATUS_SEEK_Second,
-                 .hints =
-                     {
-                         {tr("%1 set extension length", "Sketcher Extend: hint"), {MouseLeft}},
-                     }},
-            });
+        return lookupExtendHints(Mode);
     }
 
 private:
@@ -400,6 +397,29 @@ private:
         return vec1.x * vec2.y - vec1.y * vec2.x;
     }
 };
+
+DrawSketchHandlerExtend::HintTable DrawSketchHandlerExtend::getExtendHintTable()
+{
+    using enum Gui::InputHint::UserInput;
+
+    return {
+        {.state = STATUS_SEEK_First,
+         .hints = {{QObject::tr("%1 pick edge to extend", "Sketcher Extend: hint"), {MouseLeft}}}},
+        {.state = STATUS_SEEK_Second,
+         .hints = {
+             {QObject::tr("%1 set extension length", "Sketcher Extend: hint"), {MouseLeft}}}}};
+}
+
+std::list<Gui::InputHint> DrawSketchHandlerExtend::lookupExtendHints(SelectMode state)
+{
+    const auto extendHintTable = getExtendHintTable();
+
+    auto it = std::ranges::find_if(extendHintTable, [state](const HintEntry& entry) {
+        return entry.state == state;
+    });
+
+    return (it != extendHintTable.end()) ? it->hints : std::list<Gui::InputHint> {};
+}
 
 }  // namespace SketcherGui
 

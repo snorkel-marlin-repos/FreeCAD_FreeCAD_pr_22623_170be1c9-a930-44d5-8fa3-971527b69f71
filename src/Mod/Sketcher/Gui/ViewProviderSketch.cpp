@@ -633,7 +633,7 @@ void ViewProviderSketch::activateHandler(std::unique_ptr<DrawSketchHandler> newH
     assert(!sketchHandler);
 
     sketchHandler = std::move(newHandler);
-    setSketchMode(STATUS_SKETCH_UseHandler);
+    Mode = STATUS_SKETCH_UseHandler;
     sketchHandler->activate(this);
 
     // make sure receiver has focus so immediately pressing Escape will be handled by
@@ -649,7 +649,7 @@ void ViewProviderSketch::deactivateHandler()
         sketchHandler->deactivate();
         sketchHandler = nullptr;
     }
-    setSketchMode(STATUS_NONE);
+    Mode = STATUS_NONE;
 }
 
 /// removes the active handler
@@ -752,12 +752,6 @@ void ViewProviderSketch::preselectAtPoint(Base::Vector2d point)
 
 // **********************************************************************************
 
-void ViewProviderSketch::setSketchMode(SketchMode mode)
-{
-    Mode = mode;
-    Gui::Application::Instance->commandManager().testActive();
-}
-
 bool ViewProviderSketch::keyPressed(bool pressed, int key)
 {
     switch (key) {
@@ -776,7 +770,7 @@ bool ViewProviderSketch::keyPressed(bool pressed, int key)
             if (isInEditMode() && !drag.Dragged.empty()) {
                 if (!pressed) {
                     commitDragMove(drag.xInit, drag.yInit);
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                 }
                 return true;
             }
@@ -924,22 +918,22 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
                     bool done = false;
                     if (preselection.isPreselectPointValid()) {
                         // Base::Console().log("start dragging, point:%d\n",this->DragPoint);
-                        setSketchMode(STATUS_SELECT_Point);
+                        Mode = STATUS_SELECT_Point;
                         done = true;
                     }
                     else if (preselection.isPreselectCurveValid()) {
                         // Base::Console().log("start dragging, point:%d\n",this->DragPoint);
-                        setSketchMode(STATUS_SELECT_Edge);
+                        Mode = STATUS_SELECT_Edge;
                         done = true;
                     }
                     else if (preselection.isCrossPreselected()) {
                         // Base::Console().log("start dragging, point:%d\n",this->DragPoint);
-                        setSketchMode(STATUS_SELECT_Cross);
+                        Mode = STATUS_SELECT_Cross;
                         done = true;
                     }
                     else if (!preselection.PreselectConstraintSet.empty()) {
                         // Base::Console().log("start dragging, point:%d\n",this->DragPoint);
-                        setSketchMode(STATUS_SELECT_Constraint);
+                        Mode = STATUS_SELECT_Constraint;
                         done = true;
                     }
 
@@ -959,7 +953,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
                             -16000);// certainly far away from any clickable place, to avoid
                                     // re-trigger of double-click if next click happens fast.
                         if (Mode != STATUS_SELECT_Wire) {
-                            setSketchMode(STATUS_NONE);
+                            Mode = STATUS_NONE;
                         }
                     }
                     else {
@@ -968,7 +962,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
                         DoubleClick::prvCursorPos = cursorPos;
                         DoubleClick::newCursorPos = cursorPos;
                         if (!done)
-                            setSketchMode(STATUS_SKETCH_StartRubberBand);
+                            Mode = STATUS_SKETCH_StartRubberBand;
                     }
 
                     return done;
@@ -991,7 +985,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
 
                         preselectToSelection(ss, pp, true);
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 case STATUS_SELECT_Edge:
                     if (pp) {
@@ -1004,7 +998,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
 
                         preselectToSelection(ss, pp, true);
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 case STATUS_SELECT_Cross:
                     if (pp) {
@@ -1026,11 +1020,11 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
 
                         preselectToSelection(ss, pp, true);
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 case STATUS_SELECT_Wire: {
                     toggleWireSelelection(preselection.PreselectCurve);
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 }
                 case STATUS_SELECT_Constraint:
@@ -1043,11 +1037,11 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
                             preselectToSelection(ss, pp, true);
                         }
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 case STATUS_SKETCH_Drag:
                     commitDragMove(x, y);
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 case STATUS_SKETCH_DragConstraint:
                     if (!drag.DragConstraintSet.empty()) {
@@ -1073,14 +1067,14 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
                         getDocument()->commitCommand();
                         tryAutoRecomputeIfNotSolve(getSketchObject());
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 case STATUS_SKETCH_StartRubberBand:// a single click happened, so clear selection
                                                    // unless user hold control.
                     if (!(QApplication::keyboardModifiers() & Qt::ControlModifier)) {
                         Gui::Selection().clearSelection();
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 case STATUS_SKETCH_UseRubberBand:
                     doBoxSelection(DoubleClick::prvCursorPos, cursorPos, viewer);
@@ -1089,7 +1083,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
                     // a redraw is required in order to clear the rubberband
                     draw(true, false);
                     const_cast<Gui::View3DInventorViewer*>(viewer)->redraw();
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return true;
                 case STATUS_SKETCH_UseHandler: {
                     sketchHandler->applyCursor();
@@ -1109,19 +1103,19 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
                 case STATUS_NONE: {
                     if (preselection.isPreselectPointValid()) {
                         // Base::Console().log("start dragging, point:%d\n",this->DragPoint);
-                        setSketchMode(STATUS_SELECT_Point);
+                        Mode = STATUS_SELECT_Point;
                     }
                     else if (preselection.isPreselectCurveValid()) {
                         // Base::Console().log("start dragging, point:%d\n",this->DragPoint);
-                        setSketchMode(STATUS_SELECT_Edge);
+                        Mode = STATUS_SELECT_Edge;
                     }
                     else if (preselection.isCrossPreselected()) {
                         // Base::Console().log("start dragging, point:%d\n",this->DragPoint);
-                        setSketchMode(STATUS_SELECT_Cross);
+                        Mode = STATUS_SELECT_Cross;
                     }
                     else if (!preselection.PreselectConstraintSet.empty()) {
                         // Base::Console().log("start dragging, point:%d\n",this->DragPoint);
-                        setSketchMode(STATUS_SELECT_Constraint);
+                        Mode = STATUS_SELECT_Constraint;
                     }
                 }
                 default:
@@ -1146,7 +1140,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
 
                         preselectToSelection(ss, pp, false);
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     generateContextMenu();
                     return true;
                 case STATUS_SELECT_Edge:
@@ -1162,7 +1156,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
 
                         preselectToSelection(ss, pp, false);
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     generateContextMenu();
                     return true;
                 case STATUS_SELECT_Cross:
@@ -1185,7 +1179,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
 
                         preselectToSelection(ss, pp, false);
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     generateContextMenu();
                     return true;
                 case STATUS_SELECT_Constraint: {
@@ -1198,7 +1192,7 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
                             preselectToSelection(ss, pp, false);
                         }
                     }
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     generateContextMenu();
                     return true;
                 }
@@ -1237,7 +1231,7 @@ void ViewProviderSketch::editDoubleClicked()
     else if (preselection.isPreselectCurveValid()) {
         // We cannot do toggleWireSelelection directly here because the released event with
         //STATUS_NONE return false which clears the selection.
-        setSketchMode(STATUS_SELECT_Wire);
+        Mode = STATUS_SELECT_Wire;
     }
     else if (preselection.isCrossPreselected()) {
         Base::Console().log("double click cross:%d\n",
@@ -1400,7 +1394,7 @@ bool ViewProviderSketch::mouseMove(const SbVec2s& cursorPos, Gui::View3DInventor
                 initDragging(geoId, pos, viewer);
             }
             else {
-                setSketchMode(STATUS_NONE);
+                Mode = STATUS_NONE;
             }
             resetPreselectPoint();
             return true;
@@ -1412,12 +1406,12 @@ bool ViewProviderSketch::mouseMove(const SbVec2s& cursorPos, Gui::View3DInventor
                 initDragging(geoId, pos, viewer);
             }
             else {
-                setSketchMode(STATUS_NONE);
+                Mode = STATUS_NONE;
             }
             resetPreselectPoint();
             return true;
         case STATUS_SELECT_Constraint:
-            setSketchMode(STATUS_SKETCH_DragConstraint);
+            Mode = STATUS_SKETCH_DragConstraint;
             drag.DragConstraintSet = preselection.PreselectConstraintSet;
             drag.xInit = x;
             drag.yInit = y;
@@ -1444,7 +1438,7 @@ bool ViewProviderSketch::mouseMove(const SbVec2s& cursorPos, Gui::View3DInventor
             }
             return true;
         case STATUS_SKETCH_StartRubberBand: {
-            setSketchMode(STATUS_SKETCH_UseRubberBand);
+            Mode = STATUS_SKETCH_UseRubberBand;
             rubberband->setWorking(true);
             return true;
         }
@@ -1475,7 +1469,7 @@ void ViewProviderSketch::initDragging(int geoId, Sketcher::PointPos pos, Gui::Vi
     }
 
     drag.reset();
-    setSketchMode(STATUS_SKETCH_Drag);
+    Mode = STATUS_SKETCH_Drag;
     drag.Dragged.push_back(GeoElementId(geoId, pos));
 
     // Adding selected geos that should be dragged as well.
@@ -1548,7 +1542,7 @@ void ViewProviderSketch::initDragging(int geoId, Sketcher::PointPos pos, Gui::Vi
 
                 // Edge parameters are Independent, so weight won't move
                 if (solvext->getEdge() == Sketcher::SolverGeometryExtension::Independent) {
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return;
                 }
 
@@ -1573,7 +1567,7 @@ void ViewProviderSketch::initDragging(int geoId, Sketcher::PointPos pos, Gui::Vi
                 }
 
                 if (bsplinegeoid == -1) {
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return;
                 }
 
@@ -1597,7 +1591,7 @@ void ViewProviderSketch::initDragging(int geoId, Sketcher::PointPos pos, Gui::Vi
                 }
 
                 if (allingroup) {// it is constrained to be non-rational
-                    setSketchMode(STATUS_NONE);
+                    Mode = STATUS_NONE;
                     return;
                 }
             }
@@ -1753,14 +1747,14 @@ void ViewProviderSketch::commitDragMove(double x, double y)
     resetPositionText();
 }
 
-void ViewProviderSketch::moveConstraint(int constNum, const Base::Vector2d& toPos, OffsetMode offset)
+void ViewProviderSketch::moveConstraint(int constNum, const Base::Vector2d& toPos)
 {
     if (auto constr = getConstraint(constNum)) {
-        moveConstraint(constr, constNum, toPos, offset);
+        moveConstraint(constr, constNum, toPos);
     }
 }
 
-void ViewProviderSketch::moveConstraint(Sketcher::Constraint* Constr, int constNum, const Base::Vector2d& toPos, OffsetMode offset)
+void ViewProviderSketch::moveConstraint(Sketcher::Constraint* Constr, int constNum, const Base::Vector2d& toPos)
 {
     // are we in edit?
     if (!isInEditMode())
@@ -1942,29 +1936,13 @@ void ViewProviderSketch::moveConstraint(Sketcher::Constraint* Constr, int constN
         else if (Constr->Type == DistanceY)
             dir = Base::Vector3d(0, (p2.y - p1.y >= std::numeric_limits<float>::epsilon()) ? 1 : -1, 0);
 
-        double offsetVal = 0.0;
-        if (offset == OffsetConstraint) {
-            if (auto* view = qobject_cast<Gui::View3DInventor*>(this->getActiveView())) {
-                Gui::View3DInventorViewer* viewer = view->getViewer();
-                float fHeight = -1.0;
-                float fWidth = -1.0;
-                viewer->getDimensions(fHeight, fWidth);
-                offsetVal = (fHeight + fWidth) * 0.01;
-            }
-        }
-
         if (Constr->Type == Radius || Constr->Type == Diameter || Constr->Type == Weight) {
-            double distance = vec.x * dir.x + vec.y * dir.y;
-            if (distance > offsetVal) {
-                distance -= offsetVal;
-            }
-            Constr->LabelDistance = distance;
+            Constr->LabelDistance = vec.x * dir.x + vec.y * dir.y;
             Constr->LabelPosition = atan2(dir.y, dir.x);
         }
         else {
             Base::Vector3d normal(-dir.y, dir.x, 0);
-            double distance = vec.x * normal.x + vec.y * normal.y - offsetVal;
-            Constr->LabelDistance = distance;
+            Constr->LabelDistance = vec.x * normal.x + vec.y * normal.y;
             if (Constr->Type == Distance || Constr->Type == DistanceX
                 || Constr->Type == DistanceY) {
                 vec = Base::Vector3d(toPos.x, toPos.y, 0) - (p2 + p1) / 2;

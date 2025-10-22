@@ -387,6 +387,8 @@ std::vector<LineSet> DrawGeomHatch::getTrimmedLines(DrawViewPart* source,
 /* static */
 std::vector<TopoDS_Edge> DrawGeomHatch::makeEdgeOverlay(PATLineSpec hatchLine, Bnd_Box bBox, double scale, double rotation)
 {
+    using std::numbers::pi;
+
     const size_t MaxNumberOfEdges = Preferences::getPreferenceGroup("PAT")->GetInt("MaxSeg", 10000l);
 
     std::vector<TopoDS_Edge> result;

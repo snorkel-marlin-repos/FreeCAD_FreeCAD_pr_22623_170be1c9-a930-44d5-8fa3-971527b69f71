@@ -23,6 +23,7 @@
 
 #include "FCGlobal.h"
 
+#include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <string>
 #include <Base/FileInfo.h>

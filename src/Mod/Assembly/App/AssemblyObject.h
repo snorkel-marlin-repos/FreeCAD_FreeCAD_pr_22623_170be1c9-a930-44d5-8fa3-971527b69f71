@@ -188,8 +188,6 @@ public:
 
     std::vector<App::DocumentObject*> getMotionsFromSimulation(App::DocumentObject* sim);
 
-    bool isMbDJointValid(App::DocumentObject* joint);
-
 private:
     std::shared_ptr<MbD::ASMTAssembly> mbdAssembly;
 

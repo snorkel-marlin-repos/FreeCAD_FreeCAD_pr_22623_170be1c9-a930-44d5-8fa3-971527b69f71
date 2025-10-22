@@ -150,10 +150,9 @@ ViewProviderSketchDrawSketchHandlerAttorney::setAngleSnapping(ViewProviderSketch
 
 inline void ViewProviderSketchDrawSketchHandlerAttorney::moveConstraint(ViewProviderSketch& vp,
                                                                         int constNum,
-                                                                        const Base::Vector2d& toPos,
-                                                                        OffsetMode offset)
+                                                                        const Base::Vector2d& toPos)
 {
-    vp.moveConstraint(constNum, toPos, offset);
+    vp.moveConstraint(constNum, toPos);
 }
 
 inline void
@@ -1093,12 +1092,9 @@ void DrawSketchHandler::setAngleSnapping(bool enable, Base::Vector2d referencePo
                                                                   referencePoint);
 }
 
-void DrawSketchHandler::moveConstraint(int constNum, const Base::Vector2d& toPos, OffsetMode offset)
+void DrawSketchHandler::moveConstraint(int constNum, const Base::Vector2d& toPos)
 {
-    ViewProviderSketchDrawSketchHandlerAttorney::moveConstraint(*sketchgui,
-                                                                constNum,
-                                                                toPos,
-                                                                offset);
+    ViewProviderSketchDrawSketchHandlerAttorney::moveConstraint(*sketchgui, constNum, toPos);
 }
 
 void DrawSketchHandler::signalToolChanged() const

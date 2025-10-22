@@ -253,7 +253,7 @@ private:
 
     /// Find helper angle for radius/diameter constraint
     void findHelperAngles(double& helperStartAngle,
-                          double& helperRange,
+                          double& helperAngle,
                           double angle,
                           double startAngle,
                           double endAngle);

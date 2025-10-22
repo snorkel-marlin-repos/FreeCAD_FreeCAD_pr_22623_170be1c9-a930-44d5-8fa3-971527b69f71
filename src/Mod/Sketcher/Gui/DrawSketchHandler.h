@@ -23,8 +23,8 @@
 #ifndef SKETCHERGUI_DrawSketchHandler_H
 #define SKETCHERGUI_DrawSketchHandler_H
 
+#include <QCursor>
 #include <QPixmap>
-#include <QCoreApplication>
 
 #include <Inventor/SbString.h>
 
@@ -38,7 +38,6 @@
 #include <Mod/Sketcher/App/Constraint.h>
 
 #include "AutoConstraint.h"
-#include "Utils.h"
 
 class QWidget;
 
@@ -85,6 +84,7 @@ private:
     int curvedEdgeCountSegments;
 };
 
+
 /**
  * In order to enforce a certain degree of encapsulation and promote a not
  * too tight coupling, while still allowing well defined collaboration,
@@ -117,10 +117,8 @@ private:
     static inline int getPreselectCurve(const ViewProviderSketch& vp);
     static inline int getPreselectCross(const ViewProviderSketch& vp);
 
-    static inline void moveConstraint(ViewProviderSketch& vp,
-                                      int constNum,
-                                      const Base::Vector2d& toPos,
-                                      OffsetMode offset = NoOffset);
+    static inline void
+    moveConstraint(ViewProviderSketch& vp, int constNum, const Base::Vector2d& toPos);
 
     static inline void signalToolChanged(const ViewProviderSketch& vp, const std::string& toolname);
 
@@ -144,8 +142,6 @@ private:
  */
 class SketcherGuiExport DrawSketchHandler: public Gui::ToolHandler
 {
-    Q_DECLARE_TR_FUNCTIONS(DrawSketchHandler)
-
 public:
     DrawSketchHandler();
     virtual ~DrawSketchHandler();
@@ -166,11 +162,10 @@ public:
         return false;
     }
 
-    std::list<Gui::InputHint> getToolHints() const override
+    virtual std::list<Gui::InputHint> getToolHints() const
     {
         return {};
     }
-
     void quit() override;
 
     friend class ViewProviderSketch;
@@ -279,7 +274,7 @@ protected:
 
     void setAngleSnapping(bool enable, Base::Vector2d referencePoint = Base::Vector2d(0., 0.));
 
-    void moveConstraint(int constNum, const Base::Vector2d& toPos, OffsetMode offset = NoOffset);
+    void moveConstraint(int constNum, const Base::Vector2d& toPos);
 
     void signalToolChanged() const;
 
