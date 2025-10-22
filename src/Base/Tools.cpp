@@ -27,7 +27,6 @@
 #include <string>
 #include <sstream>
 #include <QDateTime>
-#include <QTimeZone>
 #endif
 
 #include "PyExport.h"
@@ -245,7 +244,7 @@ std::string Base::Tools::joinList(const std::vector<std::string>& vec, const std
 std::string Base::Tools::currentDateTimeString()
 {
     return QDateTime::currentDateTime()
-        .toTimeZone(QTimeZone::systemTimeZone())
+        .toTimeSpec(Qt::OffsetFromUTC)
         .toString(Qt::ISODate)
         .toStdString();
 }

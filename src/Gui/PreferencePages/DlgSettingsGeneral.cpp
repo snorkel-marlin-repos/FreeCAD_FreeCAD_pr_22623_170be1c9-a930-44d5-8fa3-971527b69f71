@@ -33,6 +33,7 @@
 # include <QMessageBox>
 # include <QString>
 # include <algorithm>
+# include <boost/filesystem.hpp>
 #endif
 
 #include <App/Document.h>

@@ -7600,21 +7600,21 @@ int SketchObject::getGeoIdFromCompleteGeometryIndex(int completeGeometryIndex) c
     else
         return (completeGeometryIndex - completeGeometryCount);
 }
-int SketchObject::getSingleScaleDefiningConstraint() const
+bool SketchObject::hasSingleScaleDefiningConstraint() const
 {
     const std::vector<Constraint*>& vals = this->Constraints.getValues();
 
-    int found = -1;
-    for (size_t i = 0; i < vals.size(); ++i) {
+    bool foundOne = false;
+    for (auto val : vals) {
         // An angle does not define scale
-        if (vals[i]->isDimensional() && vals[i]->Type != Angle) {
-            if (found != -1) { // More than one scale defining constraint
-                return -1;
+        if (val->isDimensional() && val->Type != Angle) {
+            if (foundOne) {
+                return false;
             }
-            found = i;
+            foundOne = true;
         }
     }
-    return found;
+    return foundOne;
 }
 
 std::unique_ptr<const GeometryFacade> SketchObject::getGeometryFacade(int GeoId) const

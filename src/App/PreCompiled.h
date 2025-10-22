@@ -97,6 +97,9 @@
 #include <boost/bind/bind.hpp>
 #include <boost/core/ignore_unused.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem/exception.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/scope_exit.hpp>
 
 #include <fmt/format.h>

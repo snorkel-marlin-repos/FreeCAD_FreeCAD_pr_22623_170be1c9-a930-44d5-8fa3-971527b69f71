@@ -43,7 +43,6 @@
 #include "PropertyVisualLayerList.h"
 
 #include "ShortcutListener.h"
-#include "Utils.h"
 
 
 class TopoDS_Shape;
@@ -549,8 +548,10 @@ public:
     };
 
     /// is called by GuiCommands to set the drawing mode
-    void setSketchMode(SketchMode mode);
-
+    void setSketchMode(SketchMode mode)
+    {
+        Mode = mode;
+    }
     /// get the sketch mode
     SketchMode getSketchMode() const
     {
@@ -809,11 +810,8 @@ private:
     /** @name miscelanea utilities */
     //@{
     /// moves a selected constraint
-    void moveConstraint(int constNum, const Base::Vector2d& toPos, OffsetMode offset = NoOffset);
-    void moveConstraint(Sketcher::Constraint*,
-                        int constNum,
-                        const Base::Vector2d& toPos,
-                        OffsetMode offset = NoOffset);
+    void moveConstraint(int constNum, const Base::Vector2d& toPos);
+    void moveConstraint(Sketcher::Constraint*, int constNum, const Base::Vector2d& toPos);
     void moveAngleConstraint(Sketcher::Constraint*, int constNum, const Base::Vector2d& toPos);
 
     /// returns whether the sketch is in edit mode.

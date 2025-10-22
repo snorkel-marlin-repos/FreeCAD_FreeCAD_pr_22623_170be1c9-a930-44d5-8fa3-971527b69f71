@@ -53,7 +53,6 @@ public:
     App::PropertyStiffnessDensity StickSlope;
     App::PropertyBool EnableThermalContact;
     App::PropertyStringList ThermalContactConductance;
-    App::PropertyBool HardContact;
 
     // etc
     /* */

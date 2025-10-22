@@ -68,11 +68,6 @@ ConstraintContact::ConstraintContact()
                       "ConstraintContact",
                       App::PropertyType(App::Prop_None),
                       "Thermal contact conductance");
-    ADD_PROPERTY_TYPE(HardContact,
-                      (false),
-                      "ConstraintContact",
-                      App::PropertyType(App::Prop_None),
-                      "Enable hard contact");
 }
 
 App::DocumentObjectExecReturn* ConstraintContact::execute()

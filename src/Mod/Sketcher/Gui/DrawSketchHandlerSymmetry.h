@@ -191,7 +191,7 @@ private:
 
     QString getToolWidgetText() const override
     {
-        return QString(tr("Symmetry parameters"));
+        return QString(QObject::tr("Symmetry parameters"));
     }
 
     void activated() override
@@ -221,8 +221,7 @@ public:
         using enum Gui::InputHint::UserInput;
 
         return {
-            {tr("%1 pick axis, edge, or point", "Sketcher Symmetry: hint"), {MouseLeft}},
-        };
+            {QObject::tr("%1 pick axis, edge, or point", "Sketcher Symmetry: hint"), {MouseLeft}}};
     }
 
     void deleteOriginalGeos()

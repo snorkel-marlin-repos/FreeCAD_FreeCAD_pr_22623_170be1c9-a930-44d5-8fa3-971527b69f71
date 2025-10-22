@@ -90,54 +90,7 @@ public:
 private:
     std::list<Gui::InputHint> getToolHints() const override
     {
-        using State = std::pair<ConstructionMethod, SelectMode>;
-        using enum Gui::InputHint::UserInput;
-
-        const Gui::InputHint switchModeHint {tr("%1 switch mode"), {KeyM}};
-
-        return Gui::lookupHints<State>(
-            {constructionMethod(), state()},
-            {
-                // Center method
-                {.state = {ConstructionMethod::Center, SelectMode::SeekFirst},
-                 .hints =
-                     {
-                         {tr("%1 pick arc center"), {MouseLeft}},
-                         switchModeHint,
-                     }},
-                {.state = {ConstructionMethod::Center, SelectMode::SeekSecond},
-                 .hints =
-                     {
-                         {tr("%1 pick arc start point"), {MouseLeft}},
-                         switchModeHint,
-                     }},
-                {.state = {ConstructionMethod::Center, SelectMode::SeekThird},
-                 .hints =
-                     {
-                         {tr("%1 pick arc end point"), {MouseLeft}},
-                         switchModeHint,
-                     }},
-
-                // ThreeRim method
-                {.state = {ConstructionMethod::ThreeRim, SelectMode::SeekFirst},
-                 .hints =
-                     {
-                         {tr("%1 pick first arc point"), {MouseLeft}},
-                         switchModeHint,
-                     }},
-                {.state = {ConstructionMethod::ThreeRim, SelectMode::SeekSecond},
-                 .hints =
-                     {
-                         {tr("%1 pick second arc point"), {MouseLeft}},
-                         switchModeHint,
-                     }},
-                {.state = {ConstructionMethod::ThreeRim, SelectMode::SeekThird},
-                 .hints =
-                     {
-                         {tr("%1 pick third arc point"), {MouseLeft}},
-                         switchModeHint,
-                     }},
-            });
+        return lookupArcHints(constructionMethod(), state());
     }
 
     void updateDataAndDrawToPosition(Base::Vector2d onSketchPos) override
@@ -389,7 +342,7 @@ private:
 
     QString getToolWidgetText() const override
     {
-        return QString(tr("Arc parameters"));
+        return QString(QObject::tr("Arc parameters"));
     }
 
     bool canGoToNextMode() override
@@ -478,6 +431,21 @@ private:
             }
         }
     }
+
+    // Hint table structures
+    struct HintEntry
+    {
+        ConstructionMethod method;
+        SelectMode state;
+        std::list<Gui::InputHint> hints;
+    };
+
+    using HintTable = std::vector<HintEntry>;
+
+    // Static declaration
+    static Gui::InputHint switchModeHint();
+    static HintTable getArcHintTable();
+    static std::list<Gui::InputHint> lookupArcHints(ConstructionMethod method, SelectMode state);
 
 private:
     Base::Vector2d centerPoint, firstPoint, secondPoint;
@@ -958,6 +926,60 @@ template<>
 void DSHArcController::doConstructionMethodChanged()
 {
     handler->updateHint();
+}
+
+// Static member definitions
+Gui::InputHint DrawSketchHandlerArc::switchModeHint()
+{
+    return {QObject::tr("%1 switch mode"), {Gui::InputHint::UserInput::KeyM}};
+}
+
+DrawSketchHandlerArc::HintTable DrawSketchHandlerArc::getArcHintTable()
+{
+    const auto switchHint = switchModeHint();
+    return {
+        // Structure: {ConstructionMethod, SelectMode, {hints...}}
+
+        // Center method
+        {ConstructionMethod::Center,
+         SelectMode::SeekFirst,
+         {{QObject::tr("%1 pick arc center"), {Gui::InputHint::UserInput::MouseLeft}}, switchHint}},
+        {ConstructionMethod::Center,
+         SelectMode::SeekSecond,
+         {{QObject::tr("%1 pick arc start point"), {Gui::InputHint::UserInput::MouseLeft}},
+          switchHint}},
+        {ConstructionMethod::Center,
+         SelectMode::SeekThird,
+         {{QObject::tr("%1 pick arc end point"), {Gui::InputHint::UserInput::MouseLeft}},
+          switchHint}},
+
+        // ThreeRim method
+        {ConstructionMethod::ThreeRim,
+         SelectMode::SeekFirst,
+         {{QObject::tr("%1 pick first arc point"), {Gui::InputHint::UserInput::MouseLeft}},
+          switchHint}},
+        {ConstructionMethod::ThreeRim,
+         SelectMode::SeekSecond,
+         {{QObject::tr("%1 pick second arc point"), {Gui::InputHint::UserInput::MouseLeft}},
+          switchHint}},
+        {ConstructionMethod::ThreeRim,
+         SelectMode::SeekThird,
+         {{QObject::tr("%1 pick third arc point"), {Gui::InputHint::UserInput::MouseLeft}},
+          switchHint}}};
+}
+
+std::list<Gui::InputHint> DrawSketchHandlerArc::lookupArcHints(ConstructionMethod method,
+                                                               SelectMode state)
+{
+    const auto arcHintTable = getArcHintTable();
+
+    auto it = std::find_if(arcHintTable.begin(),
+                           arcHintTable.end(),
+                           [method, state](const HintEntry& entry) {
+                               return entry.method == method && entry.state == state;
+                           });
+
+    return (it != arcHintTable.end()) ? it->hints : std::list<Gui::InputHint> {};
 }
 
 }  // namespace SketcherGui
